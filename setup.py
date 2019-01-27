@@ -13,9 +13,7 @@ setup(
     author_email="kislyuk@gmail.com",
     description="Python Yubikey AWS signature library",
     long_description=open("README.rst").read(),
-    install_requires=[
-        "libusb1"
-    ],
+    install_requires=[],
     tests_require=tests_require,
     extras_require={
         "test": tests_require,
