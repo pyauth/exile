@@ -10,16 +10,15 @@ Installation
 
     pip install exile
 
+On Linux, install ``libpcsclite-dev`` (``apt install libpcsclite-dev``, ``yum install pcsc-lite-devel``).
+
 Synopsis
 --------
 
 .. code-block:: python
 
-    import base64, logging
     import boto3, botocore.auth
     from exile import YKOATH, SCardManager
-
-    logging.basicConfig(level=logging.INFO)
 
     ykoath = YKOATH(SCardManager())
 
