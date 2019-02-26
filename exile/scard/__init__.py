@@ -67,15 +67,15 @@ class SCard(SCardConstants):
         return self("SCardSetTimeout", hContext, dwTimeout)
 
     def Connect(self, hContext: SCARDCONTEXT,
-                szReader: str, # const char *szReader, The name of the reader that contains the target card.
+                szReader: c_char_p,
                 dwShareMode: SCardConstants.ShareMode,
                 dwPreferredProtocols: SCardConstants.Protocol,
                 phCard: SCARDHANDLE,
                 pdwActiveProtocol: SCardConstants.Protocol) -> SCardConstants.SCardStatus:
         """
-        The SCardConnect function establishes a connection (using a specific resource manager context) between the calling
-        application and a smart card contained by a specific reader. If no card exists in the specified reader, an error is
-        returned.
+        The SCardConnect function establishes a connection (using a specific resource manager context) between the
+        calling application and a smart card contained by a specific reader. If no card exists in the specified reader,
+        an error is returned.
         """
         return self("SCardConnect", hContext, szReader, dwShareMode, dwPreferredProtocols, phCard, pdwActiveProtocol)
 
@@ -93,8 +93,8 @@ class SCard(SCardConstants):
 
     def Disconnect(self, hCard: SCARDHANDLE, dwDisposition: SCardConstants.Disposition) -> SCardConstants.SCardStatus:
         """
-        The SCardDisconnect function terminates a connection previously opened between the calling application and a smart
-        card in the target reader.
+        The SCardDisconnect function terminates a connection previously opened between the calling application and a
+        smart card in the target reader.
         """
         return self("SCardDisconnect", hCard, dwDisposition)
 
@@ -107,10 +107,11 @@ class SCard(SCardConstants):
         """
         return self("SCardBeginTransaction", hCard)
 
-    def EndTransaction(self, hCard: SCARDHANDLE, dwDisposition: SCardConstants.Disposition) -> SCardConstants.SCardStatus:
+    def EndTransaction(self, hCard: SCARDHANDLE,
+                       dwDisposition: SCardConstants.Disposition) -> SCardConstants.SCardStatus:
         """
-        The SCardEndTransaction function completes a previously declared transaction, allowing other applications to resume
-        interactions with the card.
+        The SCardEndTransaction function completes a previously declared transaction, allowing other applications to
+        resume interactions with the card.
         """
         return self("SCardEndTransaction", hCard, dwDisposition)
 
@@ -125,9 +126,9 @@ class SCard(SCardConstants):
                pbAtr,
                pcbAtrLen) -> SCardConstants.SCardStatus:
         """
-        The SCardStatus function provides the current status of a smart card in a reader. You can call it any time after a
-        successful call to SCardConnect and before a successful call to SCardDisconnect. It does not affect the state of
-        the reader or reader driver.
+        The SCardStatus function provides the current status of a smart card in a reader. You can call it any time
+        after a successful call to SCardConnect and before a successful call to SCardDisconnect. It does not affect the
+        state of the reader or reader driver.
         """
         return self("SCardStatus", hCard, mszReaderNames, pcchReaderLen, pdwState, pdwProtocol, pbAtr, pcbAtrLen)
 
@@ -145,7 +146,7 @@ class SCard(SCardConstants):
                 cbRecvLength,
                 lpBytesReturned) -> SCardConstants.SCardStatus:
         """
-        The SCardControl function gives you direct control of the reader. You can call it any time after a successful 
+        The SCardControl function gives you direct control of the reader. You can call it any time after a successful
         call to SCardConnect and before a successful call to SCardDisconnect. The effect on the state of the reader
         depends on the control code.
         """
@@ -166,10 +167,7 @@ class SCard(SCardConstants):
         return self("SCardTransmit", hCard, pioSendPci, pbSendBuffer, cbSendLength, pioRecvPci, pbRecvBuffer,
                     pcbRecvLength)
 
-    def ListReaderGroups(self, hContext: SCARDCONTEXT,
-                         mszGroups, #char *mszGroups,
-                         pcchGroups #uint32_t *pcchGroups
-    ) -> SCardConstants.SCardStatus:
+    def ListReaderGroups(self, hContext: SCARDCONTEXT, mszGroups, pcchGroups) -> SCardConstants.SCardStatus:
         return self("SCardListReaderGroups", hContext, mszGroups, pcchGroups)
 
     def ListReaders(self, hContext: SCARDCONTEXT, mszGroups, mszReaders, pcchReaders) -> SCardConstants.SCardStatus:
@@ -202,9 +200,9 @@ class SCard(SCardConstants):
 
     def SetAttrib(self, hCard: SCARDHANDLE, dwAttrId, pbAttr, cbAttrLen) -> SCardConstants.SCardStatus:
         """
-        The SCardSetAttrib function sets the given reader attribute for the given handle. It does not affect the state of
-        the reader, reader driver, or smart card. Not all attributes are supported by all readers (nor can they be set
-        at all times) as many of the attributes are under direct control of the transport protocol.
+        The SCardSetAttrib function sets the given reader attribute for the given handle. It does not affect the state
+        of the reader, reader driver, or smart card. Not all attributes are supported by all readers (nor can they be
+        set at all times) as many of the attributes are under direct control of the transport protocol.
         """
         return self("SCardSetAttrib", hCard, dwAttrId, pbAttr, cbAttrLen)
 

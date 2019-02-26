@@ -11,6 +11,7 @@ class SCardConstants:
     """enhanced (64K + APDU + Lc + Le) Tx/Rx Buffer"""
     MAX_ATR_SIZE = 33
     MAX_READERNAME = 52
+
     class SCardStatus(Enum):
         S_SUCCESS = 0x00000000
         """No error was encountered."""
