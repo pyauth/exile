@@ -18,9 +18,9 @@ Synopsis
 .. code-block:: python
 
     import boto3, botocore.auth
-    from exile import YKOATH, SCardManager
+    from exile import YKOATH
 
-    ykoath = YKOATH(SCardManager())
+    ykoath = YKOATH()
 
     def write_active_aws_key_to_yubikey():
         credentials = boto3.Session().get_credentials()

@@ -17,7 +17,7 @@ class YKOATHConstants:
         ALGORITHM = 0x7b
         TOUCH = 0x7c
 
-    class OATHType:
+    class OATHType(Enum):
         HOTP = 0x10
         TOTP = 0x20
 
@@ -36,7 +36,7 @@ class YKOATHConstants:
         CALCULATE_ALL = 0xa4
         SEND_REMAINING = 0xa5
 
-    class Algorithm:
+    class Algorithm(Enum):
         SHA1 = 0x01
         SHA256 = 0x02
         SHA512 = 0x03
@@ -49,7 +49,7 @@ class YKOATHConstants:
         PIV = b'\xa0\x00\x00\x03\x08'
         U2F = b'\xa0\x00\x00\x06\x47\x2f\x00\x01'
 
-    class Error(Enum):
+    class Response(Enum):
         SUCCESS = b'\x90\x00'
         NO_SPACE = b'\x6a\x84'
         NOT_FOUND = b'\x69\x84'
