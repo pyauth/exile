@@ -23,6 +23,9 @@ class SCardError(Exception):
     pass
 
 class SCard(SCardConstants):
+    """
+    See https://docs.microsoft.com/en-us/windows/desktop/api/winscard/
+    """
     def __init__(self):
         if platform.system() == "Darwin":
             lib_name = "PCSC.framework/PCSC"

@@ -24,27 +24,42 @@ Synopsis
 
     def write_active_aws_key_to_yubikey():
         credentials = boto3.Session().get_credentials()
-        secret_name = "exile-" + credentials.access_key[len("AKIA"):]
-        # This is for SigV4 only. Other formats will require a separate secret
+
+        key_name = "exile-{}-SigV4".format(credentials.access_key)
         secret = b"AWS4" + credentials.secret_key.encode()
-        print("Writing YubiKey OATH credential", secret_name, "for", credentials.access_key)
-        ykoath.put(secret_name, secret, algorithm=YKOATH.Algorithm.SHA256)
+        print("Writing YubiKey OATH SigV4 credential", key_name, "for", credentials.access_key)
+        ykoath.put(key_name, secret, algorithm=YKOATH.Algorithm.SHA256)
+
+        key_name = "exile-{}-HmacV1".format(credentials.access_key)
+        secret = credentials.secret_key.encode()
+        print("Writing YubiKey OATH HmacV1 credential", key_name, "for", credentials.access_key)
+        ykoath.put(key_name, secret, algorithm=YKOATH.Algorithm.SHA1)
 
     write_active_aws_key_to_yubikey()
 
     class YKSigV4Auth(botocore.auth.SigV4Auth):
         def signature(self, string_to_sign, request):
-            key_name = "exile-" + self.credentials.access_key[len("AKIA"):]
-            k_date = ykoath.calculate(key_name, request.context['timestamp'][0:8].encode(), want_truncated_response=False)
+            key_name = "exile-{}-SigV4".format(self.credentials.access_key)
+            k_date = ykoath.calculate(key_name, request.context["timestamp"][0:8].encode(), want_truncated_response=False)
             k_region = self._sign(k_date, self._region_name)
             k_service = self._sign(k_region, self._service_name)
             k_signing = self._sign(k_service, "aws4_request")
             return self._sign(k_signing, string_to_sign, hex=True)
 
+    class YKHmacV1Auth(botocore.auth.HmacV1Auth):
+        def sign_string(self, string_to_sign):
+            key_name = "exile-{}-HmacV1".format(self.credentials.access_key)
+            digest = ykoath.calculate(key_name, string_to_sign.encode(), want_truncated_response=False)
+            return encodebytes(digest).strip().decode("utf-8")
+
     botocore.auth.SigV4Auth.signature = YKSigV4Auth.signature
+    botocore.auth.HmacV1Auth.sign_string = YKHmacV1Auth.sign_string
 
     print("Using YubiKey credential to perform AWS call")
     print(boto3.client("sts").get_caller_identity())
+
+    print("Using YubiKey credential to presign an S3 URL")
+    print(boto3.client("s3").generate_presigned_url(ClientMethod="get_object", Params={"Bucket": "foo", "Key": "bar"}))
 
 Authors
 -------

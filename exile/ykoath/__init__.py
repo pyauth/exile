@@ -19,6 +19,8 @@ class YKOATH(YKOATHConstants):
     def send_apdu(self, **kwargs):
         with self.scm:
             res = self.scm.send_apdu(**kwargs)
+            while res[-2:-1] == self.Response.MORE_DATA_AVAILABLE.value:
+                res = res[:-2] + self.scm.send_apdu(cla=0, ins=self.Instruction.SEND_REMAINING, p1=0, p2=0, data=b"")
         if res[-2:] != self.Response.SUCCESS.value:
             raise YKOATHError(self.Response(res[-2:]))
         return res
