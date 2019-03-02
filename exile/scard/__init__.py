@@ -1,7 +1,7 @@
 import platform, logging
 from enum import Enum
 from binascii import b2a_hex, a2b_hex
-from ctypes import (cdll, c_void_p, POINTER, c_ulong, c_char, c_uint32, pointer, byref, create_string_buffer, c_wchar,
+from ctypes import (cdll, c_void_p, POINTER, c_ulong, c_char, c_uint32, byref, create_string_buffer, c_wchar,
                     cast, c_char_p)
 from .const import SCardConstants
 
@@ -235,7 +235,7 @@ class SCardManager(SCard):
         self.Connect(hContext=self.ctx,
                      szReader=c_char_p(list(self)[0].encode()),
                      dwShareMode=SCardConstants.ShareMode.SHARED,
-                     dwPreferredProtocols=SCardConstants.Protocol.T0 | SCardConstants.Protocol.T1,
+                     dwPreferredProtocols=SCardConstants.Protocol.ANY,
                      phCard=byref(self.handle),
                      pdwActiveProtocol=byref(self.protocol))
 
