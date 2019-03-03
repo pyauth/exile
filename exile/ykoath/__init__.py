@@ -1,6 +1,6 @@
 import struct
 from collections import namedtuple
-from ..scard import i2b, SCardManager
+from ..scard import i2b, SCardManager, SCardReader
 from .const import YKOATHConstants
 
 YKOATHCredential = namedtuple("YKOATHCredential", ("name", "oath_type", "algorithm"))
@@ -12,15 +12,22 @@ class YKOATH(YKOATHConstants):
     """
     See https://developers.yubico.com/OATH/YKOATH_Protocol.html
     """
-    def __init__(self, scm: SCardManager = None):
-        self.scm = SCardManager() if scm is None else scm
+    def __init__(self, device: SCardReader = None):
+        if device is None:
+            for reader in SCardManager():
+                if reader.name.startswith(self.device_prefix):
+                    device = reader
+                    break
+            else:
+                raise YKOATHError("No Yubikey found")
+        self.device = device
         self.send_apdu(cla=0, ins=self.Instruction.SELECT, p1=0x04, p2=0, data=self.Application.OATH)
 
     def send_apdu(self, **kwargs):
-        with self.scm:
-            res = self.scm.send_apdu(**kwargs)
+        with self.device:
+            res = self.device.send_apdu(**kwargs)
             while res[-2:-1] == self.Response.MORE_DATA_AVAILABLE.value:
-                res = res[:-2] + self.scm.send_apdu(cla=0, ins=self.Instruction.SEND_REMAINING, p1=0, p2=0, data=b"")
+                res = res[:-2] + self.device.send_apdu(cla=0, ins=self.Instruction.SEND_REMAINING, p1=0, p2=0, data=b"")
         if res[-2:] != self.Response.SUCCESS.value:
             raise YKOATHError(self.Response(res[-2:]))
         return res

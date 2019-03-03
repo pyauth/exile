@@ -1,6 +1,7 @@
 from enum import Enum
 
 class YKOATHConstants:
+    device_prefix = "Yubico Yubikey"
     HMAC_MINIMUM_KEY_SIZE = 14
 
     class Tag:

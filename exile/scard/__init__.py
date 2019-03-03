@@ -214,13 +214,18 @@ class SCardManager(SCard):
     def __init__(self):
         SCard.__init__(self)
         self.ctx = SCARDCONTEXT()
-        self.handle = SCARDHANDLE()
         self.protocol = c_ulong()
         self.EstablishContext(dwScope=self.Scope.SYSTEM, pvReserved1=0, pvReserved2=0, phContext=byref(self.ctx))
 
     def _split_multi_string(self, ms):
         p = cast(ms, POINTER(c_char))
         return p[:len(ms)].split(b"\0")
+
+    def _get_send_pci(self):
+        if self.protocol.value == self.Protocol.T0:
+            return self.pcsc.g_rgSCardT0Pci
+        elif self.protocol.value == self.Protocol.T1:
+            return self.pcsc.g_rgSCardT1Pci
 
     def __iter__(self):
         pcch_readers = c_uint32()
@@ -229,31 +234,33 @@ class SCardManager(SCard):
         self.ListReaders(hContext=self.ctx, mszGroups=0, mszReaders=s, pcchReaders=byref(pcch_readers))
         for reader in self._split_multi_string(s):
             if reader:
-                yield reader.decode()
+                yield SCardReader(name=reader.decode(), manager=self)
+
+
+class SCardReader(SCard):
+    def __init__(self, name: str, manager: SCardManager):
+        SCard.__init__(self)
+        self.name = name
+        self.manager = manager
+        self.handle = SCARDHANDLE()
 
     def __enter__(self):
-        self.Connect(hContext=self.ctx,
-                     szReader=c_char_p(list(self)[0].encode()),
+        self.Connect(hContext=self.manager.ctx,
+                     szReader=c_char_p(self.name.encode()),
                      dwShareMode=SCardConstants.ShareMode.SHARED,
                      dwPreferredProtocols=SCardConstants.Protocol.ANY,
                      phCard=byref(self.handle),
-                     pdwActiveProtocol=byref(self.protocol))
+                     pdwActiveProtocol=byref(self.manager.protocol))
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.Disconnect(hCard=self.handle, dwDisposition=SCardConstants.Disposition.LEAVE_CARD)
-
-    def _get_send_pci(self):
-        if self.protocol.value == self.Protocol.T0:
-            return self.pcsc.g_rgSCardT0Pci
-        elif self.protocol.value == self.Protocol.T1:
-            return self.pcsc.g_rgSCardT1Pci
 
     def send_apdu(self, cla, ins, p1, p2, data):
         send_buf = create_string_buffer(i2b(cla) + i2b(ins) + i2b(p1) + i2b(p2) + i2b(len(data)) + data)
         recv_buf = create_string_buffer(b"\0" * self.MAX_BUFFER_SIZE_EXTENDED)
         recv_len = c_ulong(len(recv_buf))
         self.Transmit(hCard=self.handle,
-                      pioSendPci=self._get_send_pci(),
+                      pioSendPci=self.manager._get_send_pci(),
                       pbSendBuffer=send_buf,
                       cbSendLength=len(send_buf),
                       pioRecvPci=0,
