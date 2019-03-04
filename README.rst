@@ -10,7 +10,8 @@ Installation
 
     pip install exile
 
-On Linux, install ``libpcsclite-dev`` (``apt install libpcsclite-dev``, ``yum install pcsc-lite-devel``).
+On Linux, install `pcsc-lite <https://salsa.debian.org/rousseau/PCSC>`_
+(``apt install pcscd``, ``yum install pcsc-lite``).
 
 Exile requires Python 3.6+. Python 2.7 is not supported.
 
