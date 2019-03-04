@@ -45,6 +45,13 @@ Synopsis
     print("Using YubiKey credential to presign an S3 URL")
     print(boto3.client("s3").generate_presigned_url(ClientMethod="get_object", Params={"Bucket": "foo", "Key": "bar"}))
 
+Storing the secret key on a YubiKey instead of in the home directory (``~/.aws/credentials``) protects it in case the
+host computer or its filesystem is compromised. The YubiKey acts as an `HSM
+<https://en.wikipedia.org/wiki/Hardware_security_module>`_, and can optionally be further configured to require user
+interaction (pressing a button on the key) to sign the request::
+
+    YKOATH().put(key_name, secret, algorithm=YKOATH.Algorithm.SHA256, require_touch=True)
+
 TOTP
 ----
 
