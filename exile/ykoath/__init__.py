@@ -1,10 +1,10 @@
-import base64, struct
+import base64, struct, typing
 from collections import namedtuple
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
+from ..exceptions import YKOATHError
 from ..scard import i2b, SCardManager, SCardReader
 from .const import YKOATHConstants
-from .exceptions import YKOATHError
 
 YKOATHCredential = namedtuple("YKOATHCredential", ("name", "oath_type", "algorithm"))
 
@@ -12,7 +12,7 @@ class YKOATH(YKOATHConstants):
     """
     See https://developers.yubico.com/OATH/YKOATH_Protocol.html
     """
-    def __init__(self, device: SCardReader = None):
+    def __init__(self, device: SCardReader = None) -> None:
         if device is None:
             for reader in SCardManager():
                 if reader.name.startswith(self.device_prefix):
@@ -53,11 +53,10 @@ class YKOATH(YKOATHConstants):
     def list(self):
         return self.send_apdu(cla=0, ins=self.Instruction.LIST, p1=0, p2=0, data=b"")
 
-    def calculate(self, credential_name: str, challenge: bytes, want_truncated_response=True):
-        if not isinstance(challenge, bytes):
-            challenge = int_to_bytestring(challenge)
+    def calculate(self, credential_name: str, challenge: typing.Union[bytes, int], want_truncated_response=True):
+        chal_bytes = challenge if isinstance(challenge, bytes) else int_to_bytestring(challenge)
         data = i2b(self.Tag.NAME) + i2b(len(credential_name)) + credential_name.encode()
-        data += i2b(self.Tag.CHALLENGE) + i2b(len(challenge)) + challenge
+        data += i2b(self.Tag.CHALLENGE) + i2b(len(chal_bytes)) + chal_bytes
         p2 = 0x01 if want_truncated_response else 0
         res = self.send_apdu(cla=0, ins=self.Instruction.CALCULATE, p1=0, p2=p2, data=data)
         assert res[0] == self.Tag.TRUNCATED_RESPONSE if want_truncated_response else self.Tag.RESPONSE

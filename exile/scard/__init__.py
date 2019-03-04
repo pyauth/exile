@@ -3,8 +3,8 @@ from enum import Enum
 from binascii import b2a_hex, a2b_hex
 from ctypes import (cdll, c_void_p, POINTER, c_ulong, c_char, c_uint32, byref, create_string_buffer, c_wchar,
                     cast, c_char_p)
+from ..exceptions import SCardError
 from .const import SCardConstants
-from .exceptions import SCardError
 
 logger = logging.getLogger(__name__)
 
@@ -236,7 +236,7 @@ class SCardManager(SCard):
 
 
 class SCardReader(SCard):
-    def __init__(self, name: str, manager: SCardManager):
+    def __init__(self, name: str, manager: SCardManager) -> None:
         SCard.__init__(self)
         self.name = name
         self.manager = manager
@@ -245,13 +245,13 @@ class SCardReader(SCard):
     def __enter__(self):
         self.Connect(hContext=self.manager.ctx,
                      szReader=c_char_p(self.name.encode()),
-                     dwShareMode=SCardConstants.ShareMode.SHARED,
-                     dwPreferredProtocols=SCardConstants.Protocol.ANY,
+                     dwShareMode=self.ShareMode.SHARED,
+                     dwPreferredProtocols=self.Protocol.ANY,
                      phCard=byref(self.handle),
                      pdwActiveProtocol=byref(self.manager.protocol))
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.Disconnect(hCard=self.handle, dwDisposition=SCardConstants.Disposition.LEAVE_CARD)
+        self.Disconnect(hCard=self.handle, dwDisposition=self.Disposition.LEAVE_CARD)
 
     def send_apdu(self, cla, ins, p1, p2, data):
         send_buf = create_string_buffer(i2b(cla) + i2b(ins) + i2b(p1) + i2b(p2) + i2b(len(data)) + data)

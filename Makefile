@@ -3,6 +3,7 @@ test_deps:
 
 lint: test_deps
 	./setup.py flake8
+	mypy $$(python setup.py --name) --ignore-missing-imports
 
 test: test_deps lint
 	coverage run --source=$$(python setup.py --name) ./test/test.py
