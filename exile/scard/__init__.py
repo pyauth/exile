@@ -4,6 +4,7 @@ from binascii import b2a_hex, a2b_hex
 from ctypes import (cdll, c_void_p, POINTER, c_ulong, c_char, c_uint32, byref, create_string_buffer, c_wchar,
                     cast, c_char_p)
 from .const import SCardConstants
+from .exceptions import SCardError
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,6 @@ class SCARDCONTEXT(c_uint32):
     pass
 
 class SCARDHANDLE(c_uint32):
-    pass
-
-class SCardError(Exception):
     pass
 
 class SCard(SCardConstants):

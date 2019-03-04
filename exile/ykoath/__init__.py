@@ -4,11 +4,9 @@ from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 from ..scard import i2b, SCardManager, SCardReader
 from .const import YKOATHConstants
+from .exceptions import YKOATHError
 
 YKOATHCredential = namedtuple("YKOATHCredential", ("name", "oath_type", "algorithm"))
-
-class YKOATHError(Exception):
-    pass
 
 class YKOATH(YKOATHConstants):
     """
