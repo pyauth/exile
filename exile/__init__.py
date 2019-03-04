@@ -1,2 +1,2 @@
 from .scard import SCardManager
-from .ykoath import YKOATH
+from .ykoath import YKOATH, TOTP

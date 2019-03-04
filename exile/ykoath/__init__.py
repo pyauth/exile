@@ -1,5 +1,7 @@
-import struct
+import base64, struct
 from collections import namedtuple
+from datetime import datetime
+from urllib.parse import urlparse, parse_qs
 from ..scard import i2b, SCardManager, SCardReader
 from .const import YKOATHConstants
 
@@ -83,3 +85,26 @@ def int_to_bytestring(i: int, padding=8):
         result.append(i & 0xFF)
         i >>= 8
     return bytes(bytearray(reversed(result)).rjust(padding, b'\0'))
+
+class TOTP(YKOATH):
+    default_time_step = 30
+
+    def save(self, label: str, secret: str):
+        self.put(label, base64.b32decode(secret, casefold=True))
+
+    def save_otpauth_uri(self, otpauth_uri: str):
+        otpauth = urlparse(otpauth_uri)
+        assert otpauth.scheme == "otpauth"
+        assert otpauth.netloc == "totp"
+        label = otpauth.path.lstrip("/")
+        secret = parse_qs(otpauth.query)["secret"][0]
+        self.save(secret=secret, label=label)
+
+    def get(self, label: str, at: datetime = None, time_step: int = default_time_step):
+        if at is None:
+            at = datetime.now()
+        return self.calculate(label, int(at.timestamp() / time_step))
+
+    def verify(self, code: str, label: str, at: datetime = None, time_step: int = default_time_step):
+        if self.get(label=label, at=at, time_step=time_step) != code:
+            raise YKOATHError("TOTP code mismatch")

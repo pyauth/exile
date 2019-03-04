@@ -1,5 +1,5 @@
-Exile: Python Web Authentication Relying Party library
-======================================================
+Exile: Python YubiKey AWS signature library
+===========================================
 
 **Exile** stores your AWS access key on your YubiKey device and uses it to sign your AWS API requests, protecting you
 against credential theft.
@@ -11,6 +11,8 @@ Installation
     pip install exile
 
 On Linux, install ``libpcsclite-dev`` (``apt install libpcsclite-dev``, ``yum install pcsc-lite-devel``).
+
+Exile requires Python 3.6+. Python 2.7 is not supported.
 
 Synopsis
 --------
@@ -41,6 +43,18 @@ Synopsis
 
     print("Using YubiKey credential to presign an S3 URL")
     print(boto3.client("s3").generate_presigned_url(ClientMethod="get_object", Params={"Bucket": "foo", "Key": "bar"}))
+
+TOTP
+----
+
+Because exile uses the `YubiKey OATH <https://developers.yubico.com/OATH/>`_ protocol, you can also use it to store
+`TOTP <https://en.wikipedia.org/wiki/Time-based_One-time_Password_algorithm>`_
+`2FA <https://en.wikipedia.org/wiki/Multi-factor_authentication>`_ tokens, generate and verify codes::
+
+    from exile import TOTP
+    TOTP().save("google", "JBSWY3DPEHPK3PXP")  # Or TOTP.save_otpauth_uri("otpauth://...")
+    TOTP().get("google")  # Returns a standard 6-digit TOTP code as a string
+    TOTP().verify("260153", label="google", at=datetime.datetime.fromtimestamp(1297553958))
 
 Authors
 -------
