@@ -54,7 +54,7 @@ class YKOATHConstants:
         SUCCESS = b'\x90\x00'
         NO_SPACE = b'\x6a\x84'
         NOT_FOUND = b'\x69\x84'
-        AUTH_REQUIRED = b'x69\x82'
+        AUTH_REQUIRED = b'\x69\x82'
         WRONG_SYNTAX = b'\x6a\x80'
         GENERIC_ERROR = b'\x65\x81'
         MORE_DATA_AVAILABLE = b'\x61'
