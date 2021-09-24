@@ -15,7 +15,7 @@ class YKOATH(YKOATHConstants):
     def __init__(self, device: SCardReader = None, password: str = None) -> None:
         if device is None:
             for reader in SCardManager():
-                if reader.name.startswith(self.device_prefix):
+                if reader.name.lower().startswith(self.device_prefix):
                     device = reader
                     break
             else:
