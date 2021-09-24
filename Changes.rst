@@ -1,3 +1,10 @@
+Changes for v0.1.1 (2021-09-24)
+===============================
+
+-  Properly recognize newer yubikeys
+
+-  Add support for SET_CODE and VALIDATE
+
 Changes for v0.1.0 (2019-03-03)
 ===============================
 

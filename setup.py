@@ -6,7 +6,7 @@ tests_require = ["coverage", "flake8", "wheel"]
 
 setup(
     name="exile",
-    version="0.1.0",
+    version="0.1.1",
     url="https://github.com/pyauth/exile",
     license="Apache Software License",
     author="Andrey Kislyuk",
